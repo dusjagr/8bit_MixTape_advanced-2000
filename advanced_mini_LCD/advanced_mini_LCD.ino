@@ -105,7 +105,7 @@ void setup () {
   selectLineOne();
   LCD.print("8bit MixTape Pro");
   selectLineTwo();
-  LCD.print("  Advanced 2000");
+  LCD.print("  Advanced 1980");
   delay(500);
   clearLCD();
 
