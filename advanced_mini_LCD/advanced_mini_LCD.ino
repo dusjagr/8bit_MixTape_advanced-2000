@@ -21,6 +21,7 @@ const int LCDdelay=2;  // conservative, 2 actually works
 int speakerPin = 11;
 int speakerPin2 = 3;
 int buttonPin = 12;
+int switchPin = 8;
 
 int pot0 = 0;
 int pot1 = 1;
@@ -91,6 +92,7 @@ void setup () {
   pinMode (speakerPin2, OUTPUT);
     
   pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(switchPin, INPUT_PULLUP);
 
   pinMode (pot0, INPUT);
   pinMode (pot1, INPUT);
@@ -124,7 +126,7 @@ void loop ()
     t = 0; 
     delay(20); 
     
-    if (count > 4) {
+    if (count > 5) {
       count = 0;
     } 
       
@@ -140,7 +142,7 @@ void loop ()
       if (count == 1){
         selectLineTwo();
         LCD.print(count);
-        LCD.print("-dubStep");
+        LCD.print("-Zagreb6");
       }  
       if (count == 2){
         selectLineTwo();
@@ -166,12 +168,15 @@ void loop ()
     
   case 0: // test
  
-    p0 = ((analogRead(pot0)>>6)+0);
-    p1 = (analogRead(pot1)>>5);
-    p2 = ((analogRead(pot2)>>7)+1);
+    p0 = ((analogRead(pot0)>>4)+0);
+    p1 = (analogRead(pot1)>>4);
+    p2 = ((analogRead(pot2)>>0)+0);
     delta_T = ((1023 - (analogRead(pot3)))>>0);
-     
-    v = (t|p0) * ((t>>7|t>>p1)&47&t>>p2);
+    
+    v = t*(t^t+(t>>15|1)^(t-(p2-(p1/2))^t)>>(10-(pot0/5)));
+    //v = t>>p2&1?t>>p1:-t>>p0;
+    // v = (t|p2) * ((t>>p1|t>>11)&p0&t>>3);
+    // bitMeat v = t*(((t>>(12+(p1/2)))|(t>>8))&((p0-(p2/2))&(t>>4)));
 
     analogWrite (speakerPin2, v);
     digitalWrite (speakerPin, v);
@@ -182,12 +187,12 @@ void loop ()
   
   case 1: // dubStep
  
-    p0 = (analogRead(pot0)>>7);
-    p1 = (analogRead(pot1)>>6);
-    p2 = (analogRead(pot2)>>7);
+    p0 = (analogRead(pot0)>>4);
+    p1 = (analogRead(pot1)>>4);
+    p2 = (analogRead(pot2)>>4);
     delta_T = ((1023 - (analogRead(pot3)))<<0);
     
-    v = t>>p0&1?t>>p2:-t>>p1;
+    v = (t|p2) * ((t>>p1|t>>11)&p0&t>>3);
 
     analogWrite (speakerPin2, v);
     digitalWrite (speakerPin, v);
@@ -229,7 +234,41 @@ void loop ()
     
   break;
   
+  case 5: // dubStep
+ 
+    p0 = (analogRead(pot0)>>4);
+    p1 = (analogRead(pot1)>>4);
+    p2 = (analogRead(pot2)>>4);
+    delta_T = ((1023 - (analogRead(pot3)))<<0);
+    
+    v = t>>p0&1?t>>p2:-t>>p1;
+
+    analogWrite (speakerPin2, v);
+    digitalWrite (speakerPin, v);
+    delayMicroseconds((delta_T+1));
+    t++;
+    
+  break;
+  
   }  
+ 
+  if ( digitalRead(switchPin) ==  HIGH){
+    
+    //clearLCD();
+    selectLineOne();
+    LCD.print("p2 ");  
+    LCD.print(p2);
+    LCD.print(" p1 "); 
+    LCD.print(p1);
+    LCD.print(" p0 "); 
+    LCD.print(p0);
+    LCD.print("     ");
+    selectLineTwo();
+    LCD.print("Speed ");  
+    LCD.print(delta_T);
+    LCD.print(" Song:");
+    LCD.print(count);
+  }
  
 }
 
