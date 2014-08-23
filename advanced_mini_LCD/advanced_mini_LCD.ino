@@ -1,6 +1,6 @@
 /* PCrazy shit 8-bit symphony generator                   */
 /*     */
- uiuiui
+
 /*
  * inspired by:
  *  http://countercomplex.blogspot.com/2011/10/algorithmic-symphonies-from-one-line-of.html
@@ -126,7 +126,7 @@ void loop ()
     t = 0; 
     delay(20); 
     
-    if (count > 5) {
+    if (count > 6) {
       count = 0;
     } 
       
@@ -157,9 +157,18 @@ void loop ()
       if (count == 4){
         selectLineTwo();
         LCD.print(count);
+        LCD.print("-Sausiech");
+      }     
+      if (count == 5){
+        selectLineTwo();
+        LCD.print(count);
+        LCD.print("-lo mas");
+      }     
+      if (count == 6){
+        selectLineTwo();
+        LCD.print(count);
         LCD.print("-silence");
       }     
-    
   } 
   
   lastButtonState = buttonState;
@@ -167,6 +176,25 @@ void loop ()
   switch(count) {
     
   case 0: // test
+ 
+    p0 = ((analogRead(pot0)>>4)+0);
+    p1 = (analogRead(pot1)>>4);
+    p2 = ((analogRead(pot2)>>0)+0);
+    delta_T = ((1023 - (analogRead(pot3)))>>0);
+    
+    v = ((((p0*t)/50)*(((p1*t)/50)>>8|t>>9)&((p2*46)/50)&t>>8))^(t&t>>13|t>>6);
+    //v = t>>p2&1?t>>p1:-t>>p0;
+    // v = (t|p2) * ((t>>p1|t>>11)&p0&t>>3);
+    // bitMeat v = t*(((t>>(12+(p1/2)))|(t>>8))&((p0-(p2/2))&(t>>4)));
+
+    analogWrite (speakerPin2, v);
+    digitalWrite (speakerPin, v);
+    delayMicroseconds((delta_T+1));
+    t++;
+    
+  break; 
+  
+  case 6: // test
  
     p0 = ((analogRead(pot0)>>4)+0);
     p1 = (analogRead(pot1)>>4);
